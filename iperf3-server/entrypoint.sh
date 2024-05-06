@@ -36,7 +36,7 @@ test -z "$INTERVAL" && INTERVAL="1";
 
 if test -z "$FWIP"; then
 	# in theory, the IP address in net=host and net=macvlan could be detected, but for now we just require it to be set
-	echo "Forwarding IP address (FWIP) is required." >&2;
+	echo "Forwarding IP address (FWIP) is not set, so UPNP forwarding will not be attempted." >&2;
 else
 	echo "Registering port forwarding on the router ($EXPORT -> $FWIP:$FWPORT)";
 	if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
