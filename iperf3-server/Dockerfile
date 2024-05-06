@@ -13,6 +13,9 @@ ENV CONPORT=11111 \
     FWPORT=11111 \
     EXPORT=11111 \
     FWIP= \
+    IGDURL= \
     FORMAT=m \
     INTERVAL=1
+EXPOSE 11111/TCP \
+       11111/UDP
 ENTRYPOINT ["/entrypoint.sh"]

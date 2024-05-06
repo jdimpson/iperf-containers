@@ -35,19 +35,28 @@ test -z "$INTERVAL" && INTERVAL="1";
 # in --net=macvlan, this it the value the container gets assigned by the macvlan mechanism.
 
 if test -z "$FWIP"; then
-	# in theory, the IP address in net=host and net=macvlan could be detected, but for now we just require it to be set
 	echo "Forwarding IP address (FWIP) is not set, so UPNP forwarding will not be attempted." >&2;
 else
 	echo "Registering port forwarding on the router ($EXPORT -> $FWIP:$FWPORT)";
-	if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
+	if ! test -z "$IGDURL"; then
+		echo "Using $IGDURL for UPNP port forwarding requests";
+		IGD="-u $IGDURL";
+	else
+		IGD=
+	fi
+	if upnpc $IGD -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
+		true;
+	else
 		echo "Failed to forward UDP, continuing" >&2;
 	fi
 	
-	if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
+	if upnpc $IGD -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
+		true;
+	else
 		echo "Failed to forward TCP, continuing" >&2;
 	fi
 
-	trap "upnpc -d $EXPORT TCP; upnpc -d $EXPORT UDP" EXIT;
+	trap "upnpc $IGD -d $EXPORT TCP; upnpc $IGD -d $EXPORT UDP" EXIT;
 fi
 
 echo "Running iperf3 server, listening on container port $CONPORT";

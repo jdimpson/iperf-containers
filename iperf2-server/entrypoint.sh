@@ -1,6 +1,6 @@
 #!/bin/sh
-
 iperf -v
+
 # CONPORT is the port used in the container; it's what iperf2 will bind to in server mode.
 if test -z "$CONPORT"; then
 	CONPORT=11111;
@@ -38,20 +38,30 @@ if test -z "$FWIP"; then
 	echo "Forwarding IP address (FWIP) is not set, so UPNP forwarding will not be attempted." >&2;
 else
 	echo "Registering port forwarding on the router ($EXPORT -> $FWIP:$FWPORT)";
-	if upnpc -e iperf2 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
+	if ! test -z "$IGDURL"; then
+		echo "Using $IGDURL for UPNP port forwarding requests";
+		IGD="-u $IGDURL";
+	else
+		IGD=
+	fi
+	if upnpc $IGD -e iperf2 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
+		true;
+	else
 		echo "Failed to forward UDP, continuing" >&2;
 	fi
 	
-	if upnpc -e iperf2 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
+	if upnpc $IGD -e iperf2 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
+		true;
+	else
 		echo "Failed to forward TCP, continuing" >&2;
 	fi
 
-	trap "upnpc -d $EXPORT TCP; upnpc -d $EXPORT UDP" EXIT;
-
+	trap "upnpc $IGD -d $EXPORT TCP; upnpc $IGD -d $EXPORT UDP" EXIT;
 fi
 
 echo "Running iperf2 server, listening on container TCP and UDP ports $CONPORT";
 iperf --udp --server --port "$CONPORT" --interval $INTERVAL --format $FORMAT &
 iperf --server --port "$CONPORT" --interval $INTERVAL --format $FORMAT;
 
-# TODO: handle all the advanced stuff that iperf2 can do
+# TODO: add options to support upnp authentication
+        handle all the advanced stuff that iperf2 can do
