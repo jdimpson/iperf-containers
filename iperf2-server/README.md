@@ -30,7 +30,7 @@ same external port number you may have used in the past). You might need to chan
 to change CONPORT. But you can if you want.
 
 Anyway, the `docker run` command will take care of the settings on the host and container, but we also need a rule on the router/firewall, so that it will forward the packets from the Internet into the host
-and then into the container. You can make that manually, but changing the configuration of the router/firewall. You are on your own for that.
+and then into the container. You can make that manually, by changing the configuration of the router/firewall. You are on your own for that.
 
 However, you router/firewall may support [UPnP requests for port forwarding](https://blog.qnap.com/en/what-is-upnp-port-forwarding-en/). Note that many people who are smarter than me will disable or
 disallow this feature, as it presents a security risk. So don't enable it just because I convince you that it's cool.
@@ -74,7 +74,7 @@ Local LAN ip address : X.X.X.X
 
 Find the line `Found valid IGD`. The IGDURL value is `http://Y.Y.Y.Y:36725/ctl/IPConn`.
 
-The problem is you'll have to install `upnpc` in order to run this. On Debian based systems, you can get `upnpc` from running `apt install miniupnpc`.
+The problem is you'll have to install `upnpc` on some other computer in order to run this. On Debian based systems, you can get `upnpc` from running `apt install miniupnpc`.
 
 
 ## with firewall, MACVLAN or L2 IPVLAN networking
