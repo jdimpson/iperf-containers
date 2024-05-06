@@ -21,16 +21,6 @@ if test -z "$EXPORT"; then
 	EXPORT="$FWPORT";
 fi
 
-# FWIP is the port we want the router to forward packets to. 
-# in standard docker NAT mode, and in --net=host mode, this is the IP address of the container host.
-# in --net=macvlan, this it the value the container gets assigned by the macvlan mechanism.
-
-if test -z "$FWIP"; then
-	# in theory, the IP address in net=host and net=macvlan could be detected, but for now we just require it to be set
-	echo "Forwarding IP address (FWIP) is required." >&2;
-	exit 1;
-fi
-
 echo "Container port (CONPORT): $CONPORT";
 echo "Forwarded port (FWPORT) : $FWPORT";
 echo "Forwarded IP (FWIP)     : $FWIP";
@@ -40,17 +30,25 @@ echo "External port (EXPORT)  : $EXPORT";
 test -z "$FORMAT"   && FORMAT="m"
 test -z "$INTERVAL" && INTERVAL="1";
 
+# FWIP is the port we want the router to forward packets to. 
+# in standard docker NAT mode, and in --net=host mode, this is the IP address of the container host.
+# in --net=macvlan, this it the value the container gets assigned by the macvlan mechanism.
 
-echo "Registering port forwarding on the router ($EXPORT -> $FWIP:$FWPORT)";
-if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
-	echo "Failed to forward UDP, continuing" >&2;
-fi
+if test -z "$FWIP"; then
+	# in theory, the IP address in net=host and net=macvlan could be detected, but for now we just require it to be set
+	echo "Forwarding IP address (FWIP) is required." >&2;
+else
+	echo "Registering port forwarding on the router ($EXPORT -> $FWIP:$FWPORT)";
+	if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
+		echo "Failed to forward UDP, continuing" >&2;
+	fi
 	
-if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
-	echo "Failed to forward TCP, continuing" >&2;
-fi
+	if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
+		echo "Failed to forward TCP, continuing" >&2;
+	fi
 
-trap "upnpc -d $EXPORT TCP; upnpc -d $EXPORT UDP" EXIT;
+	trap "upnpc -d $EXPORT TCP; upnpc -d $EXPORT UDP" EXIT;
+fi
 
 echo "Running iperf3 server, listening on container port $CONPORT";
 iperf3 -s -p "$CONPORT" --interval $INTERVAL --format $FORMAT;
