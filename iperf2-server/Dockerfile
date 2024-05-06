@@ -6,8 +6,9 @@
 
 FROM alpine:latest AS run
 #COPY --from=build /src/masscan/bin/masscan /masscan
+RUN apk add curl iptables speedtest-cli miniupnpc iperf
 COPY entrypoint.sh /entrypoint.sh
-RUN apk add curl iptables speedtest-cli miniupnpc iperf && chmod a+x /entrypoint.sh
+RUN chmod a+x /entrypoint.sh
 ENV CONPORT=11111 \
     FWPORT=11111 \
     EXPORT=11111 \

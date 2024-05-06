@@ -1,4 +1,5 @@
 #!/bin/sh
+iperf3 -v
 
 # CONPORT is the port used in the container; it's what iperf3 will bind to in server mode.
 if test -z "$CONPORT"; then

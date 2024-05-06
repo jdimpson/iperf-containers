@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# CONPORT is the port used in the container; it's what iperf3 will bind to in server mode.
+iperf -v
+# CONPORT is the port used in the container; it's what iperf2 will bind to in server mode.
 if test -z "$CONPORT"; then
 	CONPORT=11111;
 fi
@@ -41,17 +42,18 @@ test -z "$INTERVAL" && INTERVAL="1";
 
 
 echo "Registering port forwarding on the router ($EXPORT -> $FWIP:$FWPORT)";
-if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
+if upnpc -e iperf2 -a "$FWIP" "$FWPORT" "$EXPORT" UDP; then
 	echo "Failed to forward UDP, continuing" >&2;
 fi
 	
-if upnpc -e iperf3 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
+if upnpc -e iperf2 -a "$FWIP" "$FWPORT" "$EXPORT" TCP; then
 	echo "Failed to forward TCP, continuing" >&2;
 fi
 
 trap "upnpc -d $EXPORT TCP; upnpc -d $EXPORT UDP" EXIT;
 
-echo "Running iperf3 server, listening on container port $CONPORT";
-iperf3 -s -p "$CONPORT" --interval $INTERVAL --format $FORMAT;
+echo "Running iperf2 server, listening on container TCP and UDP ports $CONPORT";
+iperf --udp --server --port "$CONPORT" --interval $INTERVAL --format $FORMAT &
+iperf --server --port "$CONPORT" --interval $INTERVAL --format $FORMAT;
 
-# TODO: add options to support upnp authentication
+# TODO: handle all the advanced stuff that iperf2 can do
