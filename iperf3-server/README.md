@@ -1,5 +1,5 @@
 # iperf server
-This container listens on both TCP and UDP ports 11111 ("five ones") by default. If you really want to change the port used within the container, you can set it using the CONPORT environment variable.
+This container listens on both TCP and UDP ports 5202 by default. If you really want to change the port used within the container, you can set it using the CONPORT environment variable.
 
 ## Internet facing
 
@@ -25,7 +25,7 @@ this container. Here's a picture.
  |                             |       +-----------+
  +-----------------------------+
 ```
-Note that CONPORT, FWPORT, and EXPORT are all port numbers. I use the same value for all of them (11111, or five ones). You may want to change EXPORT for your own reasons (like using the 
+Note that CONPORT, FWPORT, and EXPORT are all port numbers. I use the same value for all of them (5202). You may want to change EXPORT for your own reasons (like using the 
 same external port number you may have used in the past). You might need to change FWPORT if you are running multiple instances of iperf servers on the same host. But you really shouldn't need 
 to change CONPORT. But you can if you want.
 
@@ -40,7 +40,7 @@ disallow this feature, as it presents a security risk. So don't enable it just b
 This container also contains `upnpc`, which can make UPnP requests and set up the forwaring rule for you! YOu can activate `upnpc` by providing a FWIP (forwarding IP Address) to the run command. 
 
 ```
-docker run -it --rm -p 11111:11111/tcp -p 11111:11111/udp -e FWIP=X.X.X.X jdimpson/iperf3-server
+docker run -it --rm -p 5202:5202/tcp -p 5202:5202/udp -e FWIP=X.X.X.X jdimpson/iperf3-server
 ```
 (where `X.X.X.X` is the IP address of the host in the above picture.) However, **this command won't work right.**  (The iperf server will still work, but the `upnpc` command won't successfully request
 port forwarding.)
@@ -51,7 +51,7 @@ the router/firewall. And at least so far I haven't figure out a way to make that
 Fortunately, you can bypass the multicast-based discovery step and provide the correct IGD URL to `upnpc`
 
 ```
-docker run -it --rm -p 11111:11111/tcp -p 11111:11111/udp -e FWIP=X.X.X.X -e IGDURL=http://Y.Y.Y.Y:36725/ctl/IPConn jdimpson/iperf3-server
+docker run -it --rm -p 5202:5202/tcp -p 5202:5202/udp -e FWIP=X.X.X.X -e IGDURL=http://Y.Y.Y.Y:36725/ctl/IPConn jdimpson/iperf3-server
 ```
 
 But how do you determine the IGDURL? Well, you can run `upnpc -L`, which will show result like this:
@@ -68,8 +68,8 @@ List of UPNP devices found on the network :
 Found valid IGD : http://Y.Y.Y.Y:36725/ctl/IPConn
 Local LAN ip address : X.X.X.X
  i protocol exPort->inAddr:inPort description remoteHost leaseTime
- 0 TCP 11111->X.X.X.X:11111 'iperf3' '' 0
- 1 UDP 11111->X.X.X.X:11111 'iperf3' '' 0
+ 0 TCP 5202->X.X.X.X:5202 'iperf3' '' 0
+ 1 UDP 5202->X.X.X.X:5202 'iperf3' '' 0
 ```
 
 Find the line `Found valid IGD`. The IGDURL value is `http://Y.Y.Y.Y:36725/ctl/IPConn`.
@@ -85,7 +85,7 @@ MACVLAN or L2 IPVLAN address you gave to the container, like below:
 ```
 docker run -it --rm --net=macvlan0 --ip=Z.Z.Z.Z -e FWIP=Y.Y.Y.Y  jdimpson/iperf3-server
 ```
-You also don't need the host level port forward ("-p 11111:1111/tcp ...") in this mode, either.
+You also don't need the host level port forward ("-p 5202:1111/tcp ...") in this mode, either.
 
 ## Summary
 Setting FWIP to the IP address of the container will cause `upnpc` request port forwarding twice, once each for TCP and UDP ports. That's all you need to do if your container network is in MACVLAN or Layer 2 IPVLAN modes.

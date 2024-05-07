@@ -3,7 +3,7 @@ iperf -v
 
 # CONPORT is the port used in the container; it's what iperf2 will bind to in server mode.
 if test -z "$CONPORT"; then
-	CONPORT=11111;
+	CONPORT=5001;
 fi
 
 # FWPORT is the port that the router iwll forward to.
