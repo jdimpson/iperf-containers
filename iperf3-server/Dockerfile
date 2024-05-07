@@ -9,13 +9,13 @@ FROM alpine:latest AS run
 RUN apk add curl iptables speedtest-cli miniupnpc iperf3
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
-ENV CONPORT=5202 \
-    FWPORT=5202 \
-    EXPORT=5202 \
+ENV CONPORT=5201 \
+    FWPORT=5201 \
+    EXPORT=5201 \
     FWIP= \
     IGDURL= \
     FORMAT=m \
     INTERVAL=1
-EXPOSE 5202/TCP \
-       5202/UDP
+EXPOSE 5201/TCP \
+       5201/UDP
 ENTRYPOINT ["/entrypoint.sh"]
