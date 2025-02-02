@@ -83,11 +83,23 @@ a MACVLAN or Layer 2 IPVLAN network for your container. All you need to do is ad
 MACVLAN or L2 IPVLAN address you gave to the container, like below:
 
 ```
-docker run -it --rm --net=macvlan0 --ip=Z.Z.Z.Z -e FWIP=Y.Y.Y.Y  jdimpson/iperf3-server
+docker run -it --rm --net=macvlan0 --ip=Z.Z.Z.Z -e FWIP=Z.Z.Z.Z  jdimpson/iperf3-server
 ```
 You also don't need the host level port forward ("-p 5201:1111/tcp ...") in this mode, either.
 
+### with host networking
+Finally, and easiest, is to use host networking (--net=host), and set FWIP to the IP address of the Docker host. This may allows `upnpc` multicast discovery to work and avoids need to setting up macvlan or l2vlan. It may be easiest to describe this as a script:
+
+``` 
+#!/bin/sh
+
+# set FWIP to the host IP address that follows what is (probably) the default route.
+FWIP=$(ip route get 8.8.8.8 | sed -e '/cache/d' -e 's/.* src //' -e 's/ uid .*//')
+echo Using $FWIP to register with firewall as iperf server
+docker run -it --rm --net=host -e FWIP=$FWIP jdimpson/iperf3-server
+```
+
 ## Summary
-Setting FWIP to the IP address of the container will cause `upnpc` request port forwarding twice, once each for TCP and UDP ports. That's all you need to do if your container network is in MACVLAN or Layer 2 IPVLAN modes.
-You need to set IGDURL if your container netowrk is in host mode.
+Setting FWIP to the IP address of the container will cause `upnpc` request port forwarding twice, once each for TCP and UDP ports. That's all you need to do if your container network is in MACVLAN or Layer 2 IPVLAN  or host modes.
+You need to set IGDURL if your container network is in default mode.
 
